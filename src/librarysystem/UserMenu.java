@@ -1,13 +1,16 @@
 package librarysystem;
 
+import java.sql.*;
 import java.util.Scanner;
 
 public class UserMenu {
 
 	int option;
-
-	public UserMenu() {
+	Connection conn;
+	
+	public UserMenu(Connection conn) {
 		this.option = 0;
+		this.conn = conn;
 	}
 
 	public void ShowUserMenu() {

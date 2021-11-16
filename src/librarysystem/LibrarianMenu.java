@@ -1,13 +1,16 @@
 package librarysystem;
 
+import java.sql.*;
 import java.util.Scanner;
 
 public class LibrarianMenu {
 
 	int option;
-
-	public LibrarianMenu() {
+	Connection conn;
+	
+	public LibrarianMenu(Connection conn) {
 		this.option = 0;
+		this.conn = conn;
 	}
 
 	public void ShowLibrarianMenu() {

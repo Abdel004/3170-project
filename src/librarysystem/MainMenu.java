@@ -1,4 +1,5 @@
 package librarysystem;
+
 import java.sql.*;
 import java.util.Scanner;
 
@@ -8,7 +9,7 @@ public class MainMenu {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+
 		String dbAddress = "jdbc:mysql://projgw.cse.cuhk.edu.hk:2633/db56";
 		String dbUsername = "Group56";
 		String dbPassword = "Hellodb";
@@ -16,8 +17,6 @@ public class MainMenu {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			conn = DriverManager.getConnection(dbAddress, dbUsername, dbPassword);
-			conn.close();
-			System.out.println("Sucsses!");
 		} catch (ClassNotFoundException e) {
 			System.out.println("[Error]: Java MySQL DB Driver not found!!");
 			System.exit(0);
@@ -41,15 +40,15 @@ public class MainMenu {
 			option = keyboard.nextInt();
 			switch (option) {
 			case 1:
-				AdministratorMenu adminMenu = new AdministratorMenu();
+				AdministratorMenu adminMenu = new AdministratorMenu(conn);
 				adminMenu.ShowAdministratorMenu();
 				break;
 			case 2:
-				UserMenu userMenu = new UserMenu();
+				UserMenu userMenu = new UserMenu(conn);
 				userMenu.ShowUserMenu();
 				break;
 			case 3:
-				LibrarianMenu librarianMenu = new LibrarianMenu();
+				LibrarianMenu librarianMenu = new LibrarianMenu(conn);
 				librarianMenu.ShowLibrarianMenu();
 				break;
 			case 4:
