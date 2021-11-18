@@ -1,7 +1,12 @@
 package librarysystem;
 
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;  
+import java.util.Date;  
 import java.util.Scanner;
+import java.io.File;
+import java.io.IOException;
 
 public class AdministratorMenu {
 
@@ -77,11 +82,9 @@ public class AdministratorMenu {
 			stm.addBatch(sql7);
 			stm.executeBatch();
 			stm.close();
-			System.out.println("Processing...Done. Database is initialized.");
-			System.out.print("\n");
+			System.out.println("Processing...Done. Database is initialized.\n");
 		} catch (SQLException e) {
-			System.out.println("Error encounter: " + e.getMessage());
-			System.out.print("\n");
+			System.out.println("Error encounter: " + e.getMessage() + "\n");
 		}
 	}
 	
@@ -106,18 +109,226 @@ public class AdministratorMenu {
 			rs.close();
 			stm.execute(sql4);
 			stm.close();
-			System.out.println("Processing...Done. Database is removed.");
-			System.out.print("\n");
+			System.out.println("Processing...Done. Database is removed.\n");
 		} catch (SQLException e) {
-			System.out.println("Error encounter: " + e.getMessage());
-			System.out.print("\n");
+			System.out.println("Error encounter: " + e.getMessage() + "\n");
 		} 
 	}
 	
-	public void LoadData(String path) {
+	public void LoadData(String path) throws IOException {
 		
+	      File directoryPath = new File(System.getProperty("user.dir") + "/" + path);
+	      Scanner sc = null;
+	      boolean error = false;
+	      if (directoryPath.list() != null) {
+	    	  
+	    	  File userCategories = new File(directoryPath + "/" + "user_category.txt");
+	    	  sc = new Scanner(userCategories);
+	    	  String input;
+	    	  while (sc.hasNextLine()) {
+		    	  try {
+		    		  input = sc.nextLine();
+		    		  String[] values = input.split("\t", -1);
+		    		  int ucid = Integer.parseInt(values[0]);
+		    		  int max = Integer.parseInt(values[1]);
+		    		  int period = Integer.parseInt(values[2]);
+		    		  PreparedStatement pstmt = this.conn.prepareStatement("INSERT INTO user_category(ucid,max,period) VALUES (?,?,?)");
+		    		  pstmt.setInt(1, ucid);
+		    		  pstmt.setInt(2, max);
+		    		  pstmt.setInt(3, period);
+		    		  pstmt.executeUpdate();
+		    		  pstmt.close();
+					} catch (SQLException e) {
+						System.out.println("Problem occurred while inserting row: " + e.getMessage() + "\n");
+	    	  			error = true;
+						break;
+					} 
+	    	  }
+	    	  
+	    	  File users = new File(directoryPath + "/" + "user.txt");
+	    	  sc = new Scanner(users);
+	    	  while (sc.hasNextLine()) {
+		    	  try {
+		    		  input = sc.nextLine();
+		    		  String[] values = input.split("\t", -1);
+		    		  String libuid = values[0];
+		    		  String name = values[1];
+		    		  int age = Integer.parseInt(values[2]);
+		    		  String address = values[3];
+		    		  int ucid = Integer.parseInt(values[4]);
+		    		  PreparedStatement pstmt = this.conn.prepareStatement("INSERT INTO libuser(libuid,name,age,address,ucid) VALUES (?,?,?,?,?)");
+		    		  pstmt.setString(1, libuid);
+		    		  pstmt.setString(2, name);
+		    		  pstmt.setInt(3, age);
+		    		  pstmt.setString(4, address);
+		    		  pstmt.setInt(5, ucid);
+		    		  pstmt.executeUpdate();
+		    		  pstmt.close();
+					} catch (SQLException e) {
+						System.out.println("Problem occurred while inserting row: " + e.getMessage() + "\n");
+						error = true;
+						break;
+					} 
+	    	  }
+	    	  
+	    	  File bookCategories = new File(directoryPath + "/" + "book_category.txt");
+	    	  sc = new Scanner(bookCategories);
+	    	  while (sc.hasNextLine()) {
+		    	  try {
+			    	  input = sc.nextLine();
+			    	  String[] values = input.split("\t", -1);
+		    		  int bcid = Integer.parseInt(values[0]);
+		    		  String bcname = values[1];
+		    		  PreparedStatement pstmt = this.conn.prepareStatement("INSERT INTO book_category(bcid,bcname) VALUES (?,?)");
+		    		  pstmt.setInt(1, bcid);
+		    		  pstmt.setString(2, bcname);
+		    		  pstmt.executeUpdate();
+		    		  pstmt.close();
+					} catch (SQLException e) {
+						System.out.println("Problem occurred while inserting row: " + e.getMessage() + "\n");
+						error = true;
+						break;
+					} 
+	    	  }
+	    	  
+	    	  File books = new File(directoryPath + "/" + "book.txt");
+	    	  sc = new Scanner(books);
+	    	  while (sc.hasNextLine()) {
+		    	  try {
+			    	  input = sc.nextLine();
+			    	  String[] values = input.split("\t", -1);
+		    		  String callnum = values[0];
+		    		  int copynum = Integer.parseInt(values[1]);
+		    		  String title = values[2];
+		    		  String[] authors = values[3].split(",", -1);
+		    		  String[] dateString = values[4].split("/", -1);
+		    		  try {
+		    			  String date1 = dateString[2] + "/" + dateString[1] + "/" + dateString[0];
+		    			  PreparedStatement pstmt = this.conn.prepareStatement("INSERT INTO book(callnum,title,publish,rating,tborrowed,bcid) VALUES (?,?,?,?,?,?)");
+			    		  Date date = new SimpleDateFormat("yyyy/MM/dd").parse(date1);
+			    		  java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+			    		  if (values[5].equals("null")) {
+			    			  pstmt.setString(4, null);
+			    		  } else {
+			    			  Double rating = Double.parseDouble(values[5]);
+			    			  pstmt.setDouble(4, rating);
+			    		  }
+			    		  int tborrowed = Integer.parseInt(values[6]);
+			    		  int bcid = Integer.parseInt(values[7]);
+			    		  pstmt.setString(1, callnum);
+			    		  pstmt.setString(2, title);
+			    		  pstmt.setDate(3, sqlDate);
+			    		  pstmt.setInt(5, tborrowed);
+			    		  pstmt.setInt(6, bcid);
+			    		  pstmt.executeUpdate();
+			    		  pstmt.close();
+		    			} catch (ParseException e) {
+		    			    System.out.println("Invalid date: " + e + "\n");
+		    			    break;
+		    			}
+		    		  for (int i = 1; i <= copynum; i++) {
+			    		  PreparedStatement pstmt1 = this.conn.prepareStatement("INSERT INTO copy(callnum,copynum) VALUES (?,?)");
+			    		  pstmt1.setString(1, callnum);
+			    		  pstmt1.setInt(2, i);
+			    		  pstmt1.executeUpdate();
+			    		  pstmt1.close();
+		    		  }
+		    		  for (int i = 0; i < authors.length; i++) {
+			    		  PreparedStatement pstmt2 = this.conn.prepareStatement("INSERT INTO authorship(aname,callnum) VALUES (?,?)");
+			    		  pstmt2.setString(1, authors[i]);
+			    		  pstmt2.setString(2, callnum);
+			    		  pstmt2.executeUpdate();
+			    		  pstmt2.close();
+		    		  }
+					} catch (SQLException e) {
+						System.out.println("Problem occurred while inserting row: " + e.getMessage() + "\n");
+						error = true;
+						break;
+					} 
+	    	  }
+	    	  
+	    	  File records = new File(directoryPath + "/" + "check_out.txt");
+	    	  sc = new Scanner(records);
+	    	  while (sc.hasNextLine()) {
+		    	  try {
+			    	  input = sc.nextLine();
+			    	  String[] values = input.split("\t", -1);
+		    		  String callnum = values[0];
+		    		  int copynum = Integer.parseInt(values[1]);
+		    		  String libuid = values[2];
+		    		  String[] dateString = values[3].split("/", -1);
+		    		  try {
+		    			  PreparedStatement pstmt = this.conn.prepareStatement("INSERT INTO borrow(libuid,callnum,copynum,checkout,returndate) VALUES (?,?,?,?,?)");
+		    			  String date1 = dateString[2] + "/" + dateString[1] + "/" + dateString[0];
+			    		  Date checkoutDate = new SimpleDateFormat("yyyy/MM/dd").parse(date1);
+			    		  java.sql.Date checkoutSqlDate = new java.sql.Date(checkoutDate.getTime());
+			    		  if (values[4].equals("null")) {
+			    			  pstmt.setString(5, null);
+			    		  } else {
+			    			  String[] returnString = values[4].split("/", -1);
+			    			  String date2 = returnString[2] + "/" + returnString[1] + "/" + returnString[0];
+			    			  Date returnDate = new SimpleDateFormat("yyyy/MM/dd").parse(date2);
+			    			  java.sql.Date returnSqlDate = new java.sql.Date(returnDate.getTime());
+			    			  pstmt.setDate(5, returnSqlDate);
+			    		  }
+			    		  pstmt.setString(1, libuid);
+			    		  pstmt.setString(2, callnum);
+			    		  pstmt.setInt(3, copynum);
+			    		  pstmt.setDate(4, checkoutSqlDate);
+			    		  pstmt.executeUpdate();
+			    		  pstmt.close();
+		    			} catch (ParseException e) {
+		    			    System.out.println("Invalid date: " + e + "\n");
+		    			    break;
+		    			}
+					} catch (SQLException e) {
+						System.out.println("Problem occurred while inserting row: " + e.getMessage() + "\n");
+						error = true;
+						break;
+					} 
+	    	  }
+	    	  
+	    	  if (!error) {
+	    		  System.out.println("Processing...Done. Data is inputted to the database.\n");	
+	    	  }  
+	      } else {
+	    	  throw new IOException("Folder does not exist!\n");
+	      }
+
 	}
 
+	public void ShowRecords() {
+		Statement stm;
+		try {
+			stm = this.conn.createStatement();
+			String sql2 = "SELECT table_name "
+					+ "FROM information_schema.tables "
+					+ "WHERE table_schema = 'db56'";
+			ResultSet rs = stm.executeQuery(sql2);
+			if (!rs.next()) {
+				System.out.println("No tables exist in the database.");
+			} else {
+				System.out.println("Number of records in each table:");
+				rs.previous();
+			}
+			while(rs.next())
+			{
+				Statement queryStatement = this.conn.createStatement();
+				String tableName = rs.getString(1);
+				String sql3 = "SELECT COUNT(*) FROM " + tableName;
+				ResultSet tableResults = queryStatement.executeQuery(sql3);
+				tableResults.next();
+				System.out.println(tableName + ": " + tableResults.getInt(1));
+				queryStatement.close();
+			}
+			System.out.print("\n");
+			rs.close();
+		} catch (SQLException e) {
+			System.out.println("Error encounter: " + e.getMessage() + "\n");
+		}
+
+	}
+	
 	public void ShowAdministratorMenu() {
 		System.out.print("\n");
 		while (true) {
@@ -142,10 +353,14 @@ public class AdministratorMenu {
 		case 3:
 			System.out.println("\nType in the Source Data Folder Path: ");
 			String path = keyboard.nextLine();
-			LoadData(path);
+			try {
+				LoadData(path);
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
+			}
 			break;
 		case 4:
-			
+			ShowRecords();
 			break;
 		case 5:
 			System.out.print("\n");

@@ -28,8 +28,8 @@ public class MainMenu {
 		}
 		int option = 0;
 		Scanner keyboard = new Scanner(System.in);
+		System.out.println("Welcome to Library Inquiry System!\n");
 		while (true) {
-			System.out.println("Welcome to Library Inquiry System!\n");
 			System.out.println("-----Main menu-----");
 			System.out.println("What kinds of operations would you like to perform?");
 			System.out.println("1. Operations for Administrator");
@@ -52,6 +52,7 @@ public class MainMenu {
 				librarianMenu.ShowLibrarianMenu();
 				break;
 			case 4:
+				System.out.println("Goodbye!");
 				System.exit(0);
 				break;
 			default:
