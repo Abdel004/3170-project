@@ -86,7 +86,6 @@ public class AdministratorMenu {
 	public void LoadData(String path) throws IOException {
 		String parentPath = new File(System.getProperty("user.dir")).getParent(); // remove .getParent() if using windows or (mac)?
 		File directoryPath = new File(parentPath + "/" + path);
-		System.out.println(directoryPath.getAbsolutePath());
 		Scanner sc = null;
 		boolean error = false;
 		if (directoryPath.list() != null) {
@@ -109,7 +108,7 @@ public class AdministratorMenu {
 					pstmt.executeUpdate();
 					pstmt.close();
 				} catch (SQLException e) {
-					System.out.println("Problem occurred while inserting row: " + e.getMessage() + "\n");
+					System.out.println("Something went wrong while inserting rows, Please make sure all tables are created\n");
 					error = true;
 					break;
 				}
@@ -136,7 +135,6 @@ public class AdministratorMenu {
 					pstmt.executeUpdate();
 					pstmt.close();
 				} catch (SQLException e) {
-					System.out.println("Problem occurred while inserting row: " + e.getMessage() + "\n");
 					error = true;
 					break;
 				}
@@ -157,7 +155,6 @@ public class AdministratorMenu {
 					pstmt.executeUpdate();
 					pstmt.close();
 				} catch (SQLException e) {
-					System.out.println("Problem occurred while inserting row: " + e.getMessage() + "\n");
 					error = true;
 					break;
 				}
@@ -216,7 +213,6 @@ public class AdministratorMenu {
 						pstmt2.close();
 					}
 				} catch (SQLException e) {
-					System.out.println("Problem occurred while inserting row: " + e.getMessage() + "\n");
 					error = true;
 					break;
 				}
@@ -258,7 +254,6 @@ public class AdministratorMenu {
 						break;
 					}
 				} catch (SQLException e) {
-					System.out.println("Problem occurred while inserting row: " + e.getMessage() + "\n");
 					error = true;
 					break;
 				}
@@ -324,7 +319,7 @@ public class AdministratorMenu {
 				DeleteTables();
 				break;
 			case 3:
-				System.out.println("\nType in the Source Data Folder Path: ");
+				System.out.print("\nType in the Source Data Folder Path: ");
 				String path = keyboard.nextLine();
 				try {
 					LoadData(path);
