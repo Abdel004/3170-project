@@ -33,14 +33,14 @@ public class UserMenu
 				float rating =  rs.getFloat("rating");
 				if(rs.wasNull())
 					rating = -1;
-				int bcid = rs.getInt("bcid");
+				String bcid = rs.getString("bcid");
 				pstm = conn.prepareStatement("SELECT aname from authorship WHERE callnum = ?");
 				pstm.setString(1, callNum);
 				rs = pstm.executeQuery();
 				rs.next();
 				String authors = rs.getString("aname");
 				pstm = conn.prepareStatement("SELECT bcname from book_category WHERE bcid = ?");
-				pstm.setString(1, String.valueOf(bcid));
+				pstm.setString(1, bcid);
 				rs = pstm.executeQuery();
 				rs.next();
 				String bcname = rs.getString("bcname");
@@ -153,22 +153,17 @@ public class UserMenu
 		System.out.println("|CallNum|CopyNum|Title|Author|Check-out|Returned?|");
 		try
 		{
-			String callNum = "";
-			String copyNum = "";
-			String title = "";
 			ArrayList<String> authors = new ArrayList<String>();
-			Date checkout = null;
-			Date returned = null;
 			String ret = ""; // yes or no value to indicate Returned?
 			pstm = conn.prepareStatement("SELECT callnum, copynum, checkout, return from borrow WHERE libuid = ? ORDER BY checkout DESC");
 			pstm.setString(1, userID);
 			rs = pstm.executeQuery();
 			while(rs.next())
 			{
-				callNum = rs.getString("callnum");
-				copyNum = rs.getString("copynum");
-				checkout = rs.getDate("checkout");
-				returned = rs.getDate("return");
+				String callNum = rs.getString("callnum");
+				String copyNum = rs.getString("copynum");
+				Date checkout = rs.getDate("checkout");
+				Date returned = rs.getDate("return");
 				if(rs.wasNull())
 					ret = "No";
 				else
@@ -177,7 +172,7 @@ public class UserMenu
 				pstm2.setString(1, callNum);
 				rs2 = pstm2.executeQuery();
 				rs2.next();
-				title = rs2.getString("title");
+				String title = rs2.getString("title");
 				pstm2 = conn.prepareStatement("SELECT aname from authorship WHERE callnum = ?");
 				pstm2.setString(1,  callNum);
 				// creating a result set to handle multiple authors
