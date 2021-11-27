@@ -23,6 +23,7 @@ public class UserMenu
 		ResultSet rs = null;
 		try
 		{
+			ArrayList<String> authors = new ArrayList<String>();
 			pstm = conn.prepareStatement("SELECT title, rating, bcid from book WHERE callnum = ?");
 			pstm.setString(1, callNum);
 			rs = pstm.executeQuery();
@@ -33,11 +34,17 @@ public class UserMenu
 				if(rs.wasNull())
 					rating = -1;
 				String bcid = rs.getString("bcid");
+				
 				pstm = conn.prepareStatement("SELECT aname from authorship WHERE callnum = ?");
 				pstm.setString(1, callNum);
-				rs = pstm.executeQuery();
-				rs.next();
-				String authors = rs.getString("aname");
+				// creating a result set to handle multiple authors
+				ResultSet multipleAuthors = pstm.executeQuery();
+				while(multipleAuthors.next())
+				{
+					// if multiple authors exist for a book, all of them are added to the ArrayList 'authors'
+					authors.add(multipleAuthors.getString(1));
+				}
+				
 				pstm = conn.prepareStatement("SELECT bcname from book_category WHERE bcid = ?");
 				pstm.setString(1, bcid);
 				rs = pstm.executeQuery();
@@ -54,10 +61,18 @@ public class UserMenu
 				rs.next();
 				int borrowedBooks = rs.getInt("COUNT(*)");
 				int availableBooks = totalBooks - borrowedBooks;
+				System.out.printf("|" + callNum + "|" + title + "|" + bcname + "|");
+				for(int i = 0; i < authors.size(); i++)
+				{
+					if(i == 0)
+						System.out.printf(authors.get(i));
+					else
+						System.out.printf(", " + authors.get(i));
+				}
 				if(rating != -1)
-					System.out.println("|" + callNum + "|" + title + "|" + bcname + "|" + authors + "|" + String.valueOf(rating) + "|" + String.valueOf(availableBooks) + "|");
+					System.out.println("|" + String.valueOf(rating) + "|" + String.valueOf(availableBooks) + "|");
 				else
-					System.out.println("|" + callNum + "|" + title + "|" + bcname + "|" + authors + "|null|" + String.valueOf(availableBooks) + "|");
+					System.out.println("|null|" + String.valueOf(availableBooks) + "|");
 			}
 			rs.close();
 			pstm.close();
@@ -68,6 +83,7 @@ public class UserMenu
 		}
 	}
 	
+	// function for user to search for books based on call number, title, or author
 	public void SearchBooks()
 	{
 		Scanner keyboard = new Scanner(System.in);
@@ -141,6 +157,7 @@ public class UserMenu
 			System.out.println("\nIncorrect input\n");
 	}
 	
+	// function to display the loan records of a user
 	public void ShowUserRecords()
 	{
 		Scanner keyboard = new Scanner(System.in);
