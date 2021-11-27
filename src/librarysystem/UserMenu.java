@@ -21,7 +21,6 @@ public class UserMenu
 	{
 		PreparedStatement pstm = null;
 		ResultSet rs = null;
-		System.out.println("|Call Num|Title|Book Category|Author|Rating|Available No. of Copy|");
 		try
 		{
 			pstm = conn.prepareStatement("SELECT title, rating, bcid from book WHERE callnum = ?");
@@ -49,16 +48,16 @@ public class UserMenu
 				rs = pstm.executeQuery();
 				rs.next();
 				int totalBooks = rs.getInt("COUNT(*)");
-				pstm = conn.prepareStatement("SELECT COUNT(*) from borrow WHERE callnum = ? AND return = NULL");
+				pstm = conn.prepareStatement("SELECT COUNT(*) from borrow WHERE callnum = ? AND returndate = NULL");
 				pstm.setString(1, callNum);
 				rs = pstm.executeQuery();
 				rs.next();
 				int borrowedBooks = rs.getInt("COUNT(*)");
 				int availableBooks = totalBooks - borrowedBooks;
 				if(rating != -1)
-					System.out.println("|" + callNum + "|" + title + "|" + bcname + "|" + authors + "|" + String.valueOf(rating) + "|" + String.valueOf(availableBooks));
+					System.out.println("|" + callNum + "|" + title + "|" + bcname + "|" + authors + "|" + String.valueOf(rating) + "|" + String.valueOf(availableBooks) + "|");
 				else
-					System.out.println("|" + callNum + "|" + title + "|" + bcname + "|" + authors + "|null|" + String.valueOf(availableBooks));
+					System.out.println("|" + callNum + "|" + title + "|" + bcname + "|" + authors + "|null|" + String.valueOf(availableBooks) + "|");
 			}
 			rs.close();
 			pstm.close();
@@ -80,13 +79,14 @@ public class UserMenu
 		System.out.println("2. title");
 		System.out.println("3. author");
 		System.out.print("Choose the search criterion: ");
-		option = Integer.parseInt(keyboard.nextLine()); 
+		this.option = Integer.parseInt(keyboard.nextLine()); 
 		System.out.print("Type in the Search Keyword: ");
-		if(option == 1) // search by call number
+		if(this.option == 1) // search by call number
 		{
 			try
 			{
 				callNum = keyboard.nextLine();
+				System.out.println("|Call Num|Title|Book Category|Author|Rating|Available No. of Copy|");
 				Search(callNum);
 			}
 			catch(Exception e)
@@ -95,7 +95,7 @@ public class UserMenu
 			}
 			System.out.println("End of Query");
 		}
-		else if(option == 2) // partial search by title
+		else if(this.option == 2) // partial search by title
 		{
 			try
 			{
@@ -103,6 +103,7 @@ public class UserMenu
 				pstm = conn.prepareStatement("SELECT callnum from book WHERE title LIKE ? ORDER BY callnum");
 				pstm.setString(1, "%" + title + "%");
 				rs = pstm.executeQuery();
+				System.out.println("|Call Num|Title|Book Category|Author|Rating|Available No. of Copy|");
 				while(rs.next())
 				{
 					callNum = rs.getString("callnum");
@@ -115,7 +116,7 @@ public class UserMenu
 			}
 			System.out.println("End of Query");
 		}
-		else if(option == 3) // partial search by author
+		else if(this.option == 3) // partial search by author
 		{
 			try
 			{
@@ -123,6 +124,7 @@ public class UserMenu
 				pstm = conn.prepareStatement("SELECT callnum from authorship WHERE aname LIKE ? ORDER BY callnum");
 				pstm.setString(1, "%" + author + "%");
 				rs = pstm.executeQuery();
+				System.out.println("|Call Num|Title|Book Category|Author|Rating|Available No. of Copy|");
 				while(rs.next())
 				{
 					callNum = rs.getString("callnum");
@@ -136,8 +138,7 @@ public class UserMenu
 			System.out.println("End of Query");
 		}
 		else
-			System.out.println("Incorrect input");
-		keyboard.close();
+			System.out.println("\nIncorrect input\n");
 	}
 	
 	public void ShowUserRecords()
@@ -155,7 +156,7 @@ public class UserMenu
 		{
 			ArrayList<String> authors = new ArrayList<String>();
 			String ret = ""; // yes or no value to indicate Returned?
-			pstm = conn.prepareStatement("SELECT callnum, copynum, checkout, return from borrow WHERE libuid = ? ORDER BY checkout DESC");
+			pstm = conn.prepareStatement("SELECT callnum, copynum, checkout, returndate from borrow WHERE libuid = ? ORDER BY checkout DESC");
 			pstm.setString(1, userID);
 			rs = pstm.executeQuery();
 			while(rs.next())
@@ -163,7 +164,7 @@ public class UserMenu
 				String callNum = rs.getString("callnum");
 				String copyNum = rs.getString("copynum");
 				Date checkout = rs.getDate("checkout");
-				Date returned = rs.getDate("return");
+				Date returned = rs.getDate("returndate");
 				if(rs.wasNull())
 					ret = "No";
 				else
@@ -191,14 +192,14 @@ public class UserMenu
 						System.out.printf(", " + authors.get(i));
 				}
 				System.out.printf("|" + checkout + "|" + ret + "|");
+				System.out.println();
 			}
-			System.out.println("End of Query");
+			System.out.println("\nEnd of Query\n");
 		}
 		catch(Exception e)
 		{
 			System.out.println("[Error]: " + e.getMessage());
 		}
-		keyboard.close();
 	}
 
 	public void ShowUserMenu() 
@@ -213,11 +214,11 @@ public class UserMenu
 			System.out.println("3. Return to the main menu");
 			System.out.print("Enter your choice: ");
 			Scanner keyboard = new Scanner(System.in);
-			option = Integer.parseInt(keyboard.nextLine());
-			keyboard.close();
-			switch (option) 
+			this.option = Integer.parseInt(keyboard.nextLine());
+			switch (this.option) 
 			{
 				case 1:
+					System.out.print("\n");
 					SearchBooks();
 					break;
 				case 2:

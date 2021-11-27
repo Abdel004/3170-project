@@ -84,7 +84,7 @@ public class AdministratorMenu {
 	}
 
 	public void LoadData(String path) throws IOException {
-		String parentPath = new File(System.getProperty("user.dir")).getParent(); // remove .getParent() if using windows or (mac)?
+		String parentPath = System.getProperty("user.dir"); // remove .getParent() if using windows or (mac)?
 		File directoryPath = new File(parentPath + "/" + path);
 		Scanner sc = null;
 		boolean error = false;
